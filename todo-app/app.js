@@ -15,6 +15,7 @@ const DAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周�
 let courses = [];
 let keyword = '';
 let filterDay = '';
+let editId = null;
 
 const clearForm = () => {
   nameInput.value = '';
@@ -22,6 +23,7 @@ const clearForm = () => {
   roomInput.value = '';
   daySelect.value = '周一';
   periodSelect.value = '1-2节';
+  editId = null;
   submitBtn.textContent = '添加课程';
 };
 
@@ -53,10 +55,15 @@ const render = () => {
     });
 
     const opTd = document.createElement('td');
+    const editBtn = document.createElement('button');
+    editBtn.textContent = '编辑';
+    editBtn.dataset.action = 'edit';
+    editBtn.dataset.id = course.id;
     const delBtn = document.createElement('button');
     delBtn.textContent = '删除';
     delBtn.dataset.action = 'del';
     delBtn.dataset.id = course.id;
+    opTd.appendChild(editBtn);
     opTd.appendChild(delBtn);
     tr.appendChild(opTd);
 
@@ -73,8 +80,19 @@ list.addEventListener('click', (e) => {
   if (btn.dataset.action === 'del') {
     const course = courses.find(c => c.id === id);
     courses = courses.filter(c => c.id !== id);
+    if (editId === id) clearForm();
     tip.textContent = '已删除：' + course.name;
     render();
+  } else if (btn.dataset.action === 'edit') {
+    const course = courses.find(c => c.id === id);
+    nameInput.value = course.name;
+    teacherInput.value = course.teacher;
+    daySelect.value = course.day;
+    periodSelect.value = course.period;
+    roomInput.value = course.room;
+    editId = id;
+    submitBtn.textContent = '保存修改';
+    tip.textContent = '正在编辑：' + course.name + '（改完点"保存修改"）';
   }
 });
 
@@ -114,22 +132,32 @@ form.addEventListener('submit', (e) => {
     return;
   }
 
-  const clash = courses.find(c => c.day === day && c.period === period);
+  const clash = courses.find(c => c.day === day && c.period === period && c.id !== editId);
   if (clash) {
     tip.textContent = '时间冲突：' + day + ' ' + period + ' 已有「' + clash.name + '」';
     return;
   }
 
-  courses.push({
-    id: Date.now(),
-    name: name,
-    teacher: teacher,
-    day: day,
-    period: period,
-    room: room
-  });
+  if (editId === null) {
+    courses.push({
+      id: Date.now(),
+      name: name,
+      teacher: teacher,
+      day: day,
+      period: period,
+      room: room
+    });
+    tip.textContent = '已添加：' + name;
+  } else {
+    const course = courses.find(c => c.id === editId);
+    course.name = name;
+    course.teacher = teacher;
+    course.day = day;
+    course.period = period;
+    course.room = room;
+    tip.textContent = '已保存修改：' + name;
+  }
 
-  tip.textContent = '已添加：' + name;
   clearForm();
   render();
 });
