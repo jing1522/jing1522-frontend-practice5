@@ -26,20 +26,51 @@ const render = () => {
     li.textContent = task.text;
     if (task.done) li.classList.add('done');
 
+    const edit = document.createElement('span');
+    edit.classList.add('edit');
+    edit.textContent = '编辑';
+    li.appendChild(edit);
+
     const del = document.createElement('span');
     del.classList.add('del');
     del.textContent = '×';
     li.appendChild(del);
 
     li.addEventListener('click', (e) => {
+      if (li.querySelector('input') !== null) return;   // 已经在编辑时，点行里其它地方不响应
+
       if (e.target.classList.contains('del')) {
         tasks = tasks.filter(t => t !== task);
+        save();
+        render();
+      } else if (e.target.classList.contains('edit')) {
+        li.innerHTML = '';
+        const editInput = document.createElement('input');
+        editInput.type = 'text';
+        editInput.value = task.text;
+        li.appendChild(editInput);
+        editInput.focus();
+
+        editInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            const newText = editInput.value.trim();
+            if (newText === '') {
+              tip.textContent = '任务名不能为空';
+              return;
+            }
+            task.text = newText;
+            tip.textContent = '';
+            save();
+            render();
+          }
+        });
       } else {
         task.done = !task.done;
+        save();
+        render();
       }
-      save();
-      render();
     });
+
     list.appendChild(li);
   });
 };
