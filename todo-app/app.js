@@ -4,8 +4,11 @@ const tip = document.querySelector('#tip');
 const list = document.querySelector('#task-list');
 const filters = document.querySelector('.filters');
 
-let tasks = [];
-let currentFilter = 'all';
+
+// 恢复
+let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+
+const save = () => localStorage.setItem('tasks', JSON.stringify(tasks));
 
 const render = () => {
   list.innerHTML = '';
@@ -44,6 +47,7 @@ const render = () => {
 filters.addEventListener('click', (e) => {
   if (e.target.tagName !== 'BUTTON') return;
   currentFilter = e.target.dataset.filter;
+  save();
   render();
 });
 
@@ -57,6 +61,7 @@ form.addEventListener('submit', (e) => {
   tasks.push({ text: text, done: false });
   tip.textContent = '';
   input.value = '';
+  save();
   render();
 });
 
