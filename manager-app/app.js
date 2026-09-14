@@ -7,46 +7,74 @@ const roomInput = document.querySelector('#room-input');
 const submitBtn = document.querySelector('#submit-btn');
 const tip = document.querySelector('#tip');
 const list = document.querySelector('#course-list');
+const dayFilter = document.querySelector('#day-filter');
 
-let courses = [];
+let courses = JSON.parse(localStorage.getItem('courses') || '[]');
+let filterDay = '';
+let editingCourse = null;   // 正在修改的那门课（数组里的对象），null 表示添加模式
 
-const clearForm = () => {
-  nameInput.value = '';
-  teacherInput.value = '';
-  roomInput.value = '';
-  daySelect.value = '周一';
-  periodSelect.value = '1-2节';
-  submitBtn.textContent = '添加课程';
-};
+const save = () => localStorage.setItem('courses', JSON.stringify(courses));
 
 const render = () => {
   list.innerHTML = '';
 
-  if (courses.length === 0) {
-    const tr = document.createElement('tr');
-    const td = document.createElement('td');
-    td.colSpan = 5;
-    td.className = 'empty';
-    td.textContent = '还没有课程，先添加一门吧';
-    tr.appendChild(td);
-    list.appendChild(tr);
+  const shown = courses.filter(c =>
+    filterDay === '' ? true : c.day === filterDay
+  );
+
+  if (shown.length === 0) {
+    const li = document.createElement('li');
+    li.textContent = '没有符合条件的课程';
+    list.appendChild(li);
     return;
   }
 
-  courses.forEach(course => {
-    const tr = document.createElement('tr');
-    [course.name, course.teacher, course.day, course.period, course.room].forEach(value => {
-      const td = document.createElement('td');
-      td.textContent = value;
-      tr.appendChild(td);
+  shown.forEach(course => {
+    const li = document.createElement('li');
+    li.textContent = course.name + ' · ' + course.teacher + ' · ' + course.day + ' ' + course.period + ' · ' + course.room;
+
+    const edit = document.createElement('span');
+    edit.classList.add('edit');
+    edit.textContent = '修改';
+    li.appendChild(edit);
+
+    const del = document.createElement('span');
+    del.classList.add('del');
+    del.textContent = '删除';
+    li.appendChild(del);
+
+    li.addEventListener('click', (e) => {
+      if (e.target.classList.contains('del')) {
+        if (editingCourse === course) {
+          editingCourse = null;
+          submitBtn.textContent = '添加课程';
+        }
+        courses = courses.filter(c => c !== course);
+        save();
+        render();
+      } else if (e.target.classList.contains('edit')) {
+        nameInput.value = course.name;
+        teacherInput.value = course.teacher;
+        daySelect.value = course.day;
+        periodSelect.value = course.period;
+        roomInput.value = course.room;
+        editingCourse = course;
+        submitBtn.textContent = '保存修改';
+        tip.textContent = '正在修改：' + course.name;
+      }
     });
-    list.appendChild(tr);
+
+    list.appendChild(li);
   });
 };
 
+dayFilter.addEventListener('change', () => {
+  filterDay = dayFilter.value;
+  render();
+});
+
 form.addEventListener('submit', (e) => {
   e.preventDefault();
-
   const name = nameInput.value.trim();
   const teacher = teacherInput.value.trim();
   const room = roomInput.value.trim();
@@ -55,10 +83,6 @@ form.addEventListener('submit', (e) => {
 
   if (name === '') {
     tip.textContent = '课程名不能为空';
-    return;
-  }
-  if (name.length > 20) {
-    tip.textContent = '课程名太长，请控制在20字以内';
     return;
   }
   if (teacher === '') {
@@ -70,25 +94,24 @@ form.addEventListener('submit', (e) => {
     return;
   }
 
-  const clash = courses.find(c => c.day === day && c.period === period);
-  if (clash) {
-    tip.textContent = '时间冲突：' + day + ' ' + period + ' 已有「' + clash.name + '」';
-    return;
+  if (editingCourse === null) {
+    courses.push({ name: name, teacher: teacher, day: day, period: period, room: room });
+  } else {
+    editingCourse.name = name;
+    editingCourse.teacher = teacher;
+    editingCourse.day = day;
+    editingCourse.period = period;
+    editingCourse.room = room;
+    editingCourse = null;
+    submitBtn.textContent = '添加课程';
   }
 
-  courses.push({
-    id: Date.now(),
-    name: name,
-    teacher: teacher,
-    day: day,
-    period: period,
-    room: room
-  });
-
-  tip.textContent = '已添加：' + name;
-  clearForm();
+  save();
+  tip.textContent = '';
+  nameInput.value = '';
+  teacherInput.value = '';
+  roomInput.value = '';
   render();
 });
 
-clearForm();
 render();
