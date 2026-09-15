@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的课程表</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: sans-serif; max-width: 560px; margin: 24px auto; padding: 0 16px; }
+    li { margin-bottom: 8px; }
+    .edit { margin-left: 12px; cursor: pointer; }
+    .del { margin-left: 12px; cursor: pointer; }
+    .tip { color: #c00; font-size: 14px; min-height: 20px; }
+  </style>
+</head>
+<body>
+  <h1>我的课程表</h1>
+  <form id="course-form">
+    <input type="text" id="name-input" placeholder="课程名">
+    <input type="text" id="teacher-input" placeholder="教师">
+    <select id="day-select">
+      <option value="周一">周一</option>
+      <option value="周二">周二</option>
+      <option value="周三">周三</option>
+      <option value="周四">周四</option>
+      <option value="周五">周五</option>
+      <option value="周六">周六</option>
+      <option value="周日">周日</option>
+    </select>
+    <select id="period-select">
+      <option value="1-2节">1-2节</option>
+      <option value="3-4节">3-4节</option>
+      <option value="5-6节">5-6节</option>
+      <option value="7-8节">7-8节</option>
+      <option value="9-10节">9-10节</option>
+    </select>
+    <input type="text" id="room-input" placeholder="上课地点">
+    <button type="submit" id="submit-btn">添加课程</button>
+  </form>
+  <p class="tip" id="tip"></p>
+  <p>
+    按星期查询：
+    <select id="day-filter">
+      <option value="">全部</option>
+      <option value="周一">周一</option>
+      <option value="周二">周二</option>
+      <option value="周三">周三</option>
+      <option value="周四">周四</option>
+      <option value="周五">周五</option>
+      <option value="周六">周六</option>
+      <option value="周日">周日</option>
+    </select>
+    <button type="button" id="export-btn">导出JSON</button>
+  </p>
+  <ul id="course-list"></ul>
+  <script src="app.js"></script>
+</body>
+</html>
