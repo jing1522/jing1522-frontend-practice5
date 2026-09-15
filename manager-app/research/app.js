@@ -10,11 +10,28 @@ const list = document.querySelector('#course-list');
 const dayFilter = document.querySelector('#day-filter');
 const exportBtn = document.querySelector('#export-btn');
 
-let courses = JSON.parse(localStorage.getItem('courses') || '[]');
+// 研究③：读取容错——存档被写坏（不是合法 JSON）时不能让页面直接崩
+let courses = [];
+try {
+  courses = JSON.parse(localStorage.getItem('courses') || '[]');
+} catch (e) {
+  courses = [];
+  tip.textContent = '本地存档已损坏，已重置为空白课表';
+}
 let filterDay = '';
 let editingCourse = null;   // 正在修改的那门课（数组里的对象），null 表示添加模式
 
-const save = () => localStorage.setItem('courses', JSON.stringify(courses));
+// 研究③：写入容错——本地存储写满（QuotaExceededError）时给用户友好提示，不让页面报错
+const save = () => {
+  try {
+    localStorage.setItem('courses', JSON.stringify(courses));
+    return true;
+  } catch (e) {
+    console.warn('保存失败:', e.name, e.message);
+    tip.textContent = '保存失败：本地存储空间不足，请清理后再试（' + e.name + '）';
+    return false;   // 告诉调用方：没存成
+  }
+};
 
 const render = () => {
   list.innerHTML = '';
@@ -126,8 +143,7 @@ form.addEventListener('submit', (e) => {
     submitBtn.textContent = '添加课程';
   }
 
-  save();
-  tip.textContent = '';
+  if (save()) tip.textContent = '';   // 只有真的存成了才清空提示，否则保留“保存失败”提示
   nameInput.value = '';
   teacherInput.value = '';
   roomInput.value = '';
