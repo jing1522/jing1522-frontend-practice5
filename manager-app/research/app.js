@@ -8,6 +8,7 @@ const submitBtn = document.querySelector('#submit-btn');
 const tip = document.querySelector('#tip');
 const list = document.querySelector('#course-list');
 const dayFilter = document.querySelector('#day-filter');
+const exportBtn = document.querySelector('#export-btn');
 
 let courses = JSON.parse(localStorage.getItem('courses') || '[]');
 let filterDay = '';
@@ -78,6 +79,18 @@ list.addEventListener('click', (e) => {
 dayFilter.addEventListener('change', () => {
   filterDay = dayFilter.value;
   render();
+});
+
+// 研究②：导出 JSON 文件——Blob 造出一个“文件对象”，createObjectURL 给它一个临时地址，用 a[download] 触发下载
+exportBtn.addEventListener('click', () => {
+  const data = JSON.stringify(courses, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'courses.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);   // 等下载启动后再释放临时地址
 });
 
 form.addEventListener('submit', (e) => {
