@@ -10,7 +10,7 @@ const list = document.querySelector('#course-list');
 const dayFilter = document.querySelector('#day-filter');
 const exportBtn = document.querySelector('#export-btn');
 
-// 研究③：读取容错——存档被写坏（不是合法 JSON）时不能让页面直接崩
+//读取容错——存档被写坏（不是合法 JSON）时不能让页面直接崩
 let courses = [];
 try {
   courses = JSON.parse(localStorage.getItem('courses') || '[]');
@@ -21,7 +21,7 @@ try {
 let filterDay = '';
 let editingCourse = null;   // 正在修改的那门课（数组里的对象），null 表示添加模式
 
-// 研究③：写入容错——本地存储写满（QuotaExceededError）时给用户友好提示，不让页面报错
+// 写入容错——本地存储写满（QuotaExceededError）时给用户友好提示，不让页面报错
 const save = () => {
   try {
     localStorage.setItem('courses', JSON.stringify(courses));
@@ -29,7 +29,7 @@ const save = () => {
   } catch (e) {
     console.warn('保存失败:', e.name, e.message);
     tip.textContent = '保存失败：本地存储空间不足，请清理后再试（' + e.name + '）';
-    return false;   // 告诉调用方：没存成
+    return false;   
   }
 };
 
@@ -67,10 +67,10 @@ const render = () => {
   });
 };
 
-// 研究①：事件委托——整张列表只挂 1 个监听器（重构前是每个 li 各挂 1 个，N 门课就是 N 个）
+// 事件委托——整张列表只挂 1 个监听器（重构前是每个 li 各挂 1 个，N 门课就是 N 个）
 list.addEventListener('click', (e) => {
   const li = e.target.closest('li');
-  if (!li || li.dataset.index === undefined) return;   // 占位行（没有符合条件的课程）不处理
+  if (!li || li.dataset.index === undefined) return;   
   const course = courses[Number(li.dataset.index)];
 
   if (e.target.classList.contains('del')) {
@@ -98,7 +98,7 @@ dayFilter.addEventListener('change', () => {
   render();
 });
 
-// 研究②：导出 JSON 文件——Blob 造出一个“文件对象”，createObjectURL 给它一个临时地址，用 a[download] 触发下载
+// 导出 JSON 文件——Blob 造出一个“文件对象”，createObjectURL 给它一个临时地址，用 a[download] 触发下载
 exportBtn.addEventListener('click', () => {
   const data = JSON.stringify(courses, null, 2);
   const blob = new Blob([data], { type: 'application/json' });
@@ -107,7 +107,7 @@ exportBtn.addEventListener('click', () => {
   a.href = url;
   a.download = 'courses.json';
   a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);   // 等下载启动后再释放临时地址
+  setTimeout(() => URL.revokeObjectURL(url), 1000);   
 });
 
 form.addEventListener('submit', (e) => {
@@ -143,7 +143,7 @@ form.addEventListener('submit', (e) => {
     submitBtn.textContent = '添加课程';
   }
 
-  if (save()) tip.textContent = '';   // 只有真的存成了才清空提示，否则保留“保存失败”提示
+  if (save()) tip.textContent = '';  
   nameInput.value = '';
   teacherInput.value = '';
   roomInput.value = '';

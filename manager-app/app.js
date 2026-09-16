@@ -11,7 +11,7 @@ const dayFilter = document.querySelector('#day-filter');
 
 let courses = JSON.parse(localStorage.getItem('courses') || '[]');
 let filterDay = '';
-let editingCourse = null;   // 正在修改的那门课（数组里的对象），null 表示添加模式
+let editingCourse = null;   // 正在修改的那门课
 
 const save = () => localStorage.setItem('courses', JSON.stringify(courses));
 
